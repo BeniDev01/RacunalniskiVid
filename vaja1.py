@@ -30,11 +30,25 @@ def zmanjsaj_sliko(slika):
     return cv2.resize(slika, (340, 220))
 
 def obdelaj_sliko(slika, okno_sirina, okno_visina,barva_koze_spodaj, barva_koze_zgoraj):
-    # print(barva_koze_spodaj)
-    # print(barva_koze_zgoraj)
-    x = prestej_piksle_z_barvo_koze(slika, barva_koze_spodaj, barva_koze_zgoraj) # TREBA SE IZBRATI PODSLIKO !!!!!!!!
-    return (30, 40, int(slika.shape[1] * okno_sirina / 100), int(slika.shape[0] * okno_visina / 100))
-    # print(x)
+    sirina = slika.shape[1]
+    visina = slika.shape[0]
+    pravokotnik_sirina = int(sirina * okno_sirina / 100)
+    pravokotnik_visina = int(visina * okno_visina / 100)
+
+    max = 0
+    koordinataX = 0
+    koordinataY = 0
+
+    for i in range(0, sirina - pravokotnik_sirina, 5):
+        for j in range(0, visina - pravokotnik_visina, 5):
+            tmpSlika = slika[j:j + pravokotnik_visina, i:i + pravokotnik_sirina]
+            x = prestej_piksle_z_barvo_koze(tmpSlika, barva_koze_spodaj, barva_koze_zgoraj)
+            if x > max:
+                max = x
+                koordinataX = i
+                koordinataY = j
+
+    return (koordinataX, koordinataY, pravokotnik_sirina, pravokotnik_visina)
 
 def prestej_piksle_z_barvo_koze(podslika, barva_koze_spodaj, barva_koze_zgoraj):
     return cv2.countNonZero(cv2.inRange(podslika, barva_koze_spodaj, barva_koze_zgoraj))
@@ -50,7 +64,11 @@ cv2.namedWindow("Kamera")
 while True:
     ret, slika = video.read()
     if ret == True:
+        # slika = cv2.flip(slika, 1)
         slika = cv2.flip(zmanjsaj_sliko(slika), 1)
+
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            break
 
         if cv2.waitKey(10) & 0xFF == ord('w'):
             cv2.destroyWindow("Kamera")
@@ -64,14 +82,8 @@ while True:
             z = obdelaj_sliko(slika, 20, 20, barva_koze[0], barva_koze[1])
             image = cv2.rectangle(slika, (z[0], z[1]), (z[0] + z[2], z[1] + z[3]), (255, 0, 0), 2)
         cv2.imshow("Kamera",slika)
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-
-        
-
-
     else:
         break
+
 video.release()
 cv2.destroyAllWindows()
