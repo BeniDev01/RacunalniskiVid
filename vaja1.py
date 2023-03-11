@@ -33,6 +33,7 @@ def obdelaj_sliko(slika, okno_sirina, okno_visina,barva_koze_spodaj, barva_koze_
     # print(barva_koze_spodaj)
     # print(barva_koze_zgoraj)
     x = prestej_piksle_z_barvo_koze(slika, barva_koze_spodaj, barva_koze_zgoraj) # TREBA SE IZBRATI PODSLIKO !!!!!!!!
+    return (30, 40, int(slika.shape[1] * okno_sirina / 100), int(slika.shape[0] * okno_visina / 100))
     # print(x)
 
 def prestej_piksle_z_barvo_koze(podslika, barva_koze_spodaj, barva_koze_zgoraj):
@@ -50,10 +51,6 @@ while True:
     ret, slika = video.read()
     if ret == True:
         slika = cv2.flip(zmanjsaj_sliko(slika), 1)
-        cv2.imshow("Kamera",slika)
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
 
         if cv2.waitKey(10) & 0xFF == ord('w'):
             cv2.destroyWindow("Kamera")
@@ -64,7 +61,16 @@ while True:
             barva_dolocena = True
 
         if barva_dolocena:
-            obdelaj_sliko(slika, 340, 220, barva_koze[0], barva_koze[1])
+            z = obdelaj_sliko(slika, 20, 20, barva_koze[0], barva_koze[1])
+            image = cv2.rectangle(slika, (z[0], z[1]), (z[0] + z[2], z[1] + z[3]), (255, 0, 0), 2)
+        cv2.imshow("Kamera",slika)
+
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            break
+
+        
+
+
     else:
         break
 video.release()
