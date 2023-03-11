@@ -23,7 +23,7 @@ def doloci_barvo_koze(slika, levo_zgoraj, desno_spodaj):
         # izracuna standardni odklon vsakega barvnega kanala
         std_odklon = 0
         for i in barvni_kanal_slike:
-            std_odklon = std_odklon + np.std(i, ddof=1)
+            std_odklon = std_odklon + np.std(i)
         std_odklon = std_odklon / len(barvni_kanal_slike)
 
         # nastavi min in max bgr vrednosti barve
