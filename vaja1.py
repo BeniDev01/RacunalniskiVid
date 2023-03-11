@@ -3,28 +3,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def doloci_barvo_koze(slika, levo_zgoraj, desno_spodaj):
-    print(str(levo_zgoraj[0]) + "\n" + str(levo_zgoraj[1]) + "\n" + str(desno_spodaj[0]) + "\n" + str(desno_spodaj[1]) + "\n")
+    slika = slika[levo_zgoraj[1]:desno_spodaj[1], levo_zgoraj[0]:desno_spodaj[0]]
 
     spodnja_meja_koze = np.ndarray((1,3))
     zgornja_meja_koze = np.ndarray((1,3))
 
-    for c in range(3):
-        tmp = slika[:,:,c]
+    for barvni_kanal_slike in range(3):
+        podslika = slika[:,:,barvni_kanal_slike]
         vsota = 0
-        for i in tmp:
+        for i in podslika:
             for j in i:
                 vsota = vsota + j
-        vsota = (vsota / len(tmp)) / len(tmp[0])
-        # print(vsota)
+        vsota = (vsota / len(podslika)) / len(podslika[0])
 
         std_odklon = 0
-        for i in tmp:
+        for i in podslika:
             std_odklon = std_odklon + np.std(i, ddof=1)
-        std_odklon = std_odklon / len(tmp)
-        # print(std_odklon)
+        std_odklon = std_odklon / len(podslika)
 
-        spodnja_meja_koze[0][c] = int(vsota - std_odklon) # blue, green, red
-        zgornja_meja_koze[0][c] = int(vsota + std_odklon)
+        spodnja_meja_koze[0][barvni_kanal_slike] = int(vsota - std_odklon) # blue, green, red
+        zgornja_meja_koze[0][barvni_kanal_slike] = int(vsota + std_odklon)
 
     return (spodnja_meja_koze,zgornja_meja_koze)
 
@@ -32,40 +30,41 @@ def zmanjsaj_sliko(slika):
     return cv2.resize(slika, (340, 220))
 
 def obdelaj_sliko(slika, okno_sirina, okno_visina,barva_koze_spodaj, barva_koze_zgoraj):
-    pass
+    print(barva_koze_spodaj)
+    print(barva_koze_zgoraj)
+    prestej_piksle_z_barvo_koze(slika, barva_koze_spodaj, barva_koze_zgoraj) # TREBA SE IZBRATI PODSLIKO !!!!!!!!
 
 def prestej_piksle_z_barvo_koze(podslika, barva_koze_spodaj, barva_koze_zgoraj):
     pass
 
+barva_dolocena = False
 
-cap = cv2.VideoCapture(0)
+video = cv2.VideoCapture(0)
 
-if cap.isOpened() == False:
+if video.isOpened() == False:
     print("Ne morem odpreti kamere")
     
 cv2.namedWindow("Kamera")
 while True:
-    ret, slika = cap.read()
+    ret, slika = video.read()
     if ret == True:
-        slika = zmanjsaj_sliko(slika)
-        slika = cv2.flip(slika,1)
-        if cv2.waitKey(10) & 0xFF == ord('w'):
-            cv2.destroyWindow("Kamera")
-            r = cv2.selectROI("Izberi barvo koze", slika)
-            cv2.destroyWindow("Izberi barvo koze")
-
-            izbrano_obmocje = slika[r[1]:r[1]+r[3], r[0]:r[0]+r[2]]
-
-            # x in y koordinata levo zgoraj, x + širina in y + višina desno spodaj 
-            barva_koze = doloci_barvo_koze(izbrano_obmocje, [r[0], r[1]], [r[0] + r[2], r[1] + r[3]]) 
-
-            print(barva_koze[0])
-            print(barva_koze[1])
-
+        slika = cv2.flip(zmanjsaj_sliko(slika), 1)
         cv2.imshow("Kamera",slika)
+
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
+
+        if cv2.waitKey(10) & 0xFF == ord('w'):
+            cv2.destroyWindow("Kamera")
+            k_v_slike = cv2.selectROI("Izberi barvo koze", slika) # dobimo koordinate in velikost
+            cv2.destroyWindow("Izberi barvo koze")
+            # x in y koordinata levo zgoraj, x + širina in y + višina desno spodaj 
+            barva_koze = doloci_barvo_koze(slika, [k_v_slike[0], k_v_slike[1]], [k_v_slike[0] + k_v_slike[2], k_v_slike[1] + k_v_slike[3]]) 
+            barva_dolocena = True
+
+        if barva_dolocena:
+            obdelaj_sliko(slika, 340, 220, barva_koze[0], barva_koze[1])
     else:
         break
-cap.release()
+video.release()
 cv2.destroyAllWindows()
