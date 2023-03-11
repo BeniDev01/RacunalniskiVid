@@ -30,12 +30,13 @@ def zmanjsaj_sliko(slika):
     return cv2.resize(slika, (340, 220))
 
 def obdelaj_sliko(slika, okno_sirina, okno_visina,barva_koze_spodaj, barva_koze_zgoraj):
-    print(barva_koze_spodaj)
-    print(barva_koze_zgoraj)
-    prestej_piksle_z_barvo_koze(slika, barva_koze_spodaj, barva_koze_zgoraj) # TREBA SE IZBRATI PODSLIKO !!!!!!!!
+    # print(barva_koze_spodaj)
+    # print(barva_koze_zgoraj)
+    x = prestej_piksle_z_barvo_koze(slika, barva_koze_spodaj, barva_koze_zgoraj) # TREBA SE IZBRATI PODSLIKO !!!!!!!!
+    # print(x)
 
 def prestej_piksle_z_barvo_koze(podslika, barva_koze_spodaj, barva_koze_zgoraj):
-    pass
+    return cv2.countNonZero(cv2.inRange(podslika, barva_koze_spodaj, barva_koze_zgoraj))
 
 barva_dolocena = False
 
