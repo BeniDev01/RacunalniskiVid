@@ -29,7 +29,7 @@ def doloci_barvo_koze(slika, levo_zgoraj, desno_spodaj):
     return (spodnja_meja_koze,zgornja_meja_koze)
 
 def zmanjsaj_sliko(slika):
-    pass
+    return cv2.resize(slika, (340, 220))
 
 def obdelaj_sliko(slika, okno_sirina, okno_visina,barva_koze_spodaj, barva_koze_zgoraj):
     pass
@@ -45,15 +45,16 @@ if cap.isOpened() == False:
     
 cv2.namedWindow("Kamera")
 while True:
-    ret, frame = cap.read()
+    ret, slika = cap.read()
     if ret == True:
-        frame = cv2.flip(frame,1)
+        slika = zmanjsaj_sliko(slika)
+        slika = cv2.flip(slika,1)
         if cv2.waitKey(10) & 0xFF == ord('w'):
             cv2.destroyWindow("Kamera")
-            r = cv2.selectROI("Izberi barvo koze", frame)
+            r = cv2.selectROI("Izberi barvo koze", slika)
             cv2.destroyWindow("Izberi barvo koze")
 
-            izbrano_obmocje = frame[r[1]:r[1]+r[3], r[0]:r[0]+r[2]]
+            izbrano_obmocje = slika[r[1]:r[1]+r[3], r[0]:r[0]+r[2]]
 
             # x in y koordinata levo zgoraj, x + širina in y + višina desno spodaj 
             barva_koze = doloci_barvo_koze(izbrano_obmocje, [r[0], r[1]], [r[0] + r[2], r[1] + r[3]]) 
@@ -61,7 +62,7 @@ while True:
             print(barva_koze[0])
             print(barva_koze[1])
 
-        cv2.imshow("Kamera",frame)
+        cv2.imshow("Kamera",slika)
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
     else:
